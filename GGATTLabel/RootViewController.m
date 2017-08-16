@@ -21,7 +21,16 @@
     
     GGATTLabel * ggLabel = [[GGATTLabel alloc] initWithFrame:CGRectMake(10, 100, self.view.bounds.size.width-20, 200)];
     ggLabel.font = [UIFont systemFontOfSize:15];
-    [ggLabel setText:@"GGLabel表情[:D][8o|]" stickerDic:[[NSDictionary alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"faceMap_ch" ofType:@"plist"]] stickerSize:CGSizeMake(15,15) pattern:@"\\[([^\\[\\]]+)\\]"];
+//    [ggLabel setText:@"GGLabel表情[:D][8o|]" stickerDic:[[NSDictionary alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"faceMap_ch" ofType:@"plist"]] stickerSize:CGSizeMake(15,15) pattern:@"\\[([^\\[\\]]+)\\]"];
+    [[[ggLabel setText:@"GGLabel表情[:D][8o|]"] addAttributeWithBlock:^NSMutableAttributedString *(NSMutableAttributedString *mutableAttributedString) {
+        [mutableAttributedString addAttribute:NSForegroundColorAttributeName
+                                value:[UIColor redColor]
+                                range:NSMakeRange(0, 1)];
+
+        return mutableAttributedString;
+    }] stickerDic:[[NSDictionary alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"faceMap_ch" ofType:@"plist"]] stickerSize:CGSizeMake(15,15) pattern:@"\\[([^\\[\\]]+)\\]"];
+    
+    
     ggLabel.numberOfLines = 0;
     [self.view addSubview:ggLabel];
     
