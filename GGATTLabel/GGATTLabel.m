@@ -8,9 +8,15 @@
 
 #import "GGATTLabel.h"
 
+@interface GGATTLabel ()
+
+@property(nonatomic,strong)NSMutableArray * linkRanges;
+
+@end
+
 @implementation GGATTLabel
 {
-   NSMutableAttributedString * GGText_;
+    NSMutableAttributedString * GGText_;
 }
 - (GGATTLabel *)setText:(NSString *)text stickerDic:(NSDictionary *)stickerDic stickerSize:(CGSize)stickerSize pattern:(NSString *)pattern{
     
@@ -105,6 +111,39 @@
     self.attributedText = mutableAttributedString;
     
     return self;
+}
+
+- (GGATTLabel *)urlColor:(UIColor *)urlColor{
+    
+    if (!self->GGText_)
+        return self;
+    [self.linkRanges removeAllObjects];
+    NSError *error = nil;
+    NSArray * patterns = @[@"[a-zA-Z]*://[a-zA-Z0-9/\\.]*",@"#.*?#", @"@[\\u4e00-\\u9fa5a-zA-Z0-9_-]*"];
+    for (NSString * patt in patterns) {
+        NSRegularExpression * re = [NSRegularExpression regularExpressionWithPattern:patt options:NSRegularExpressionCaseInsensitive error:&error];
+            if (!re)
+                NSLog(@"GGATTLabel err ==  %@", [error localizedDescription]);
+            NSMutableAttributedString *attributedString = self->GGText_;
+            NSArray *stickerResultArray = [re matchesInString:attributedString.string options:0 range:NSMakeRange(0, attributedString.string.length)];
+        for (NSTextCheckingResult *match in stickerResultArray) {
+            [self.linkRanges addObject:match];
+            [self addAttributeWithBlock:^NSMutableAttributedString *(NSMutableAttributedString *mutableAttributedString) {
+                [mutableAttributedString addAttribute:NSForegroundColorAttributeName
+                                                value:urlColor
+                                                range:match.range];
+                return mutableAttributedString;
+            }];
+        }
+    }
+    return self;
+}
+
+- (NSMutableArray * )linkRanges{
+    if (!_linkRanges) {
+        _linkRanges = [[NSMutableArray alloc] init];
+    }
+    return _linkRanges;
 }
 
 @end
