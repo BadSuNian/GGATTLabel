@@ -14,10 +14,9 @@
 @property (nonatomic, strong) NSTextStorage *textStorage;
 @property (nonatomic, strong) NSLayoutManager *layoutManager;
 @property (nonatomic, strong) NSTextContainer *textContainer;
-@property (nonatomic, strong) NSValue *selectedRangeValue;
+@property (nonatomic, strong) NSDictionary *selectedDic;
 @property (nonatomic, assign) BOOL  isSelected;
-@property (nonatomic, copy) void (^tapBlock)(NSString * str, NSRange range);
-
+@property (nonatomic, strong) NSMutableArray * blockArray;
 @end
 
 @implementation GGATTLabel
@@ -144,10 +143,14 @@
             }];
         }
     [self urlPattern:pattern];
+    
+    
+    
     if (block) {
-        self.tapBlock = ^(NSString * str, NSRange range){
+       void (^tapBlock)(NSString * str, NSRange range) = ^(NSString * str, NSRange range){
             block(str,range);
         };
+        [self.blockArray addObject:@{pattern:tapBlock}];
     }
     return self;
 }
@@ -157,32 +160,40 @@
     _isSelected = YES;
     
     CGPoint selectPoint = [[touches anyObject] locationInView:self];
-    self.selectedRangeValue = [self getSelectRange:selectPoint];
-    if (!_selectedRangeValue) {
+    self.selectedDic = [self getSelectRange:selectPoint];
+    if (!_selectedDic) {
         [super touchesBegan:touches withEvent:event];
     }
 }
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
-    if (!_selectedRangeValue) {
+    if (!_selectedDic) {
         [super touchesEnded:touches withEvent:event];
         return;
     }
     _isSelected = NO;
     [self setNeedsDisplay];
-    NSString *contentText = [self.textStorage.string substringWithRange:_selectedRangeValue.rangeValue];
-    self.tapBlock(contentText,_selectedRangeValue.rangeValue);
+    NSValue * value = self.selectedDic.allValues[0] ;
+    NSString *contentText = [self.textStorage.string substringWithRange:value.rangeValue];
+    void (^tapBlock)(NSString * str, NSRange range);
+    for (NSDictionary * dic in self.blockArray) {
+        if ([[dic allKeys][0] isEqualToString:[self.selectedDic allKeys][0]]) {
+            tapBlock = [dic allValues][0];
+        }
+    }
+    tapBlock(contentText,value.rangeValue);
 }
 
--(NSValue*)getSelectRange:(CGPoint)selectPoint{
+-(NSDictionary *)getSelectRange:(CGPoint)selectPoint{
     if (self.textStorage.length == 0) {
         return nil;
     }
     NSInteger index = [self.layoutManager glyphIndexForPoint:selectPoint inTextContainer:self.textContainer];
-    for (NSValue *rangeValue in self.linkRanges) {
+    for (NSDictionary * dic  in self.linkRanges) {
+        NSValue *rangeValue = dic.allValues[0];
         NSRange range = rangeValue.rangeValue;
         if (index >= range.location && index <range.location + range.length) {
             [self setNeedsDisplay];
-            return rangeValue;
+            return dic;
         }
     }
     return nil;
@@ -196,10 +207,11 @@
 }
 - (void)drawTextInRect:(CGRect)rect{
     
-    if (_selectedRangeValue) {
+    if (_selectedDic) {
         UIColor *selectColor = _isSelected ? [UIColor colorWithWhite:0.6 alpha:0.2] : [UIColor clearColor];
-        [self.textStorage addAttribute:NSBackgroundColorAttributeName value:selectColor range:self.selectedRangeValue.rangeValue];
-        [self.layoutManager drawBackgroundForGlyphRange:self.selectedRangeValue.rangeValue atPoint:CGPointMake(0, 0)];
+        NSValue * value = self.selectedDic.allValues[0] ;
+        [self.textStorage addAttribute:NSBackgroundColorAttributeName value:selectColor range:value.rangeValue];
+        [self.layoutManager drawBackgroundForGlyphRange:value.rangeValue atPoint:CGPointMake(0, 0)];
     }
     NSRange range = NSMakeRange(0, self.textStorage.length);
     [self.layoutManager drawGlyphsForGlyphRange:range atPoint:CGPointZero];
@@ -226,13 +238,11 @@
         attrString = [[NSAttributedString alloc]initWithString:self.text];
     else
         attrString = [[NSAttributedString alloc]initWithString:@""];
-    
-    self.selectedRangeValue = nil;
+    self.selectedDic = nil;
     NSMutableAttributedString *attrMString = [self getNewAttString:attrString];
     [self.textStorage setAttributedString:attrMString];
     
-//    self.linkRanges = [self getRanges:@"http(s)?://([\\w-]+\\.)+[\\w-]+(/[\\w- ./?%&=]*)?"];
-    self.linkRanges = [self getRanges:pattern];
+    [self.linkRanges addObjectsFromArray:[self getRanges:pattern]];
     [self setNeedsDisplay];
 }
 
@@ -243,7 +253,7 @@
     NSMutableArray *ranges = [NSMutableArray array];
     for (NSTextCheckingResult *result in results) {
         NSValue *value = [NSValue valueWithRange:result.range];
-        [ranges addObject:value];
+        [ranges addObject:@{pattern:value}];
     }
     return ranges;
 }
@@ -296,7 +306,12 @@
     return _linkRanges;
 }
 
-
+- (NSMutableArray * )blockArray{
+    if (!_blockArray) {
+        _blockArray = [[NSMutableArray alloc] init];
+    }
+    return _blockArray;
+}
 
 
 @end

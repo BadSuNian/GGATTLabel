@@ -503,6 +503,7 @@
 				62CF0F601F43D43000102972 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		62CF0F611F43D43000102972 /* Build configuration list for PBXNativeTarget "GGATTLabelTests" */ = {
 			isa = XCConfigurationList;
@@ -511,6 +512,7 @@
 				62CF0F631F43D43000102972 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		62CF0F641F43D43000102972 /* Build configuration list for PBXNativeTarget "GGATTLabelUITests" */ = {
 			isa = XCConfigurationList;
@@ -519,6 +521,7 @@
 				62CF0F661F43D43000102972 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
