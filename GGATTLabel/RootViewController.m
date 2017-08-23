@@ -21,13 +21,18 @@
     
     GGATTLabel * ggLabel = [[GGATTLabel alloc] initWithFrame:CGRectMake(10, 100, self.view.bounds.size.width-20, 200)];
     ggLabel.font = [UIFont systemFontOfSize:15];
-    [[[[ggLabel setText:@"GGLabel表情[:D][8o|]http://baidu.com"] addAttributeWithBlock:^NSMutableAttributedString *(NSMutableAttributedString *mutableAttributedString) {
+    [[[[[ggLabel setText:@"GGLabel表情[:D][8o|]http://baidu.com A http://baidu.com 0411-85326111"] addAttributeWithBlock:^NSMutableAttributedString *(NSMutableAttributedString *mutableAttributedString) {
         [mutableAttributedString addAttribute:NSForegroundColorAttributeName
                                 value:[UIColor redColor]
                                 range:NSMakeRange(0, 1)];
         return mutableAttributedString;
-    }] stickerDic:[[NSDictionary alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"faceMap_ch" ofType:@"plist"]] stickerSize:CGSizeMake(15,15) pattern:@"\\[([^\\[\\]]+)\\]"] urlColor:[UIColor greenColor]];
-    
+    }] stickerDic:[[NSDictionary alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"faceMap_ch" ofType:@"plist"]] stickerSize:CGSizeMake(15,15) pattern:@"\\[([^\\[\\]]+)\\]"] urlColor:[UIColor greenColor] pattern:@"http(s)?://([\\w-]+\\.)+[\\w-]+(/[\\w- ./?%&=]*)?" tapBlock:^(NSString *selectStr, NSRange range) {
+        NSLog(@"str:%@ range:%@",selectStr,NSStringFromRange(range));
+
+    }] urlColor:[UIColor yellowColor] pattern:@"\\d{3}-\\d{8}|\\d{4}-\{7,8}" tapBlock:^(NSString *selectStr, NSRange range) {
+        NSLog(@"str:%@ range:%@",selectStr,NSStringFromRange(range));
+
+    }];
     
     ggLabel.numberOfLines = 0;
     [self.view addSubview:ggLabel];

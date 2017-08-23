@@ -14,5 +14,6 @@
 - (GGATTLabel *)setText:(id)text;
 - (GGATTLabel *)addAttributeWithBlock:(NSMutableAttributedString *(^)(NSMutableAttributedString *mutableAttributedString))block;
 - (GGATTLabel *)stickerDic:(NSDictionary *)stickerDic stickerSize:(CGSize)stickerSize pattern:(NSString *)pattern;
-- (GGATTLabel *)urlColor:(UIColor *)urlColor;
+- (GGATTLabel *)urlColor:(UIColor *)urlColor pattern:(NSString *)pattern tapBlock:(void (^)(NSString *selectStr, NSRange range))block;
+
 @end
