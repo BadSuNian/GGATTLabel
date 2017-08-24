@@ -7,6 +7,7 @@
 //
 
 #import "GGATTLabel.h"
+#import "UIImage+GGImage.h"
 
 @interface GGATTLabel ()
 
@@ -23,40 +24,9 @@
 {
     NSMutableAttributedString * GGText_;
 }
-- (GGATTLabel *)setText:(NSString *)text stickerDic:(NSDictionary *)stickerDic stickerSize:(CGSize)stickerSize pattern:(NSString *)pattern{
-    
-    NSArray *stickerValuesArray = [stickerDic allValues];
-    NSArray *stickerKeyArray = [stickerDic allKeys];
-    NSError *error = nil;
-    NSRegularExpression * re = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionCaseInsensitive error:&error];
-    if (!re) {
-        NSLog(@"GGATTLabel err ==  %@", [error localizedDescription]);
-    }
-    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:text];
-    NSArray *stickerResultArray = [re matchesInString:attributedString.string options:0 range:NSMakeRange(0, attributedString.string.length)];
-    NSMutableArray *stickerLoctionArray = [NSMutableArray arrayWithCapacity:stickerResultArray.count];
-    for(NSTextCheckingResult *match in stickerResultArray) {
-        NSRange range = [match range];
-        NSString *subStr = [attributedString.string substringWithRange:range];
-        for (int i = 0; i < stickerValuesArray.count; i ++){
-            if ([stickerValuesArray[i] isEqualToString:subStr])
-            {
-                NSTextAttachment *stickerAttachment = [[NSTextAttachment alloc] init];
-                stickerAttachment.bounds = CGRectMake(stickerAttachment.bounds.origin.x, stickerAttachment.bounds.origin.y , stickerSize.width,stickerSize.height);
-                stickerAttachment.image = [UIImage imageNamed:stickerKeyArray[i]];
-                [stickerLoctionArray addObject:@{@"sticker":[NSAttributedString attributedStringWithAttachment:stickerAttachment],@"range":[NSValue valueWithRange:range]}];
-            }
-        }
-    }
-    for (NSInteger i = stickerLoctionArray.count - 1; i >= 0; i--){
-        NSRange range;
-        [stickerLoctionArray[i][@"range"] getValue:&range];
-        [attributedString replaceCharactersInRange:range withAttributedString:stickerLoctionArray[i][@"sticker"]];
-    }
-    self.attributedText = attributedString;
-    self->GGText_ = attributedString;
-    return self;
-}
+
+
+
 - (GGATTLabel *)stickerDic:(NSDictionary *)stickerDic stickerSize:(CGSize)stickerSize pattern:(NSString *)pattern
 {
 
@@ -70,6 +40,7 @@
     NSMutableAttributedString *attributedString = self->GGText_;
     NSArray *stickerResultArray = [re matchesInString:attributedString.string options:0 range:NSMakeRange(0, attributedString.string.length)];
     NSMutableArray *stickerLoctionArray = [NSMutableArray arrayWithCapacity:stickerResultArray.count];
+    NSMutableArray * gifArray = [[NSMutableArray alloc] init];
     for(NSTextCheckingResult *match in stickerResultArray) {
         NSRange range = [match range];
         NSString *subStr = [attributedString.string substringWithRange:range];
@@ -78,17 +49,52 @@
             {
                 NSTextAttachment *stickerAttachment = [[NSTextAttachment alloc] init];
                 stickerAttachment.bounds = CGRectMake(stickerAttachment.bounds.origin.x, stickerAttachment.bounds.origin.y , stickerSize.width,stickerSize.height);
-                stickerAttachment.image = [UIImage imageNamed:stickerKeyArray[i]];
+                                if ([UIImage isGif:stickerKeyArray[i]]) {
+                                    [stickerAttachment setImage:[UIImage imageNamed:@""]];
+                                    [gifArray addObject:@{@"stickerName":stickerKeyArray[i],@"range":[NSValue valueWithRange:range],@"type":@"gif"}];
+                                }
+                                else
+                                {
+                                    [stickerAttachment setImage:[UIImage GGAnimatedGIFNamed:stickerKeyArray[i]]];
+                                    [gifArray addObject:@{@"stickerName":stickerKeyArray[i],@"range":[NSValue valueWithRange:range],@"type":@"png"}];
+                                }
+                
                 [stickerLoctionArray addObject:@{@"sticker":[NSAttributedString attributedStringWithAttachment:stickerAttachment],@"range":[NSValue valueWithRange:range]}];
             }
         }
     }
+       
     for (NSInteger i = stickerLoctionArray.count - 1; i >= 0; i--){
         NSRange range;
         [stickerLoctionArray[i][@"range"] getValue:&range];
         [attributedString replaceCharactersInRange:range withAttributedString:stickerLoctionArray[i][@"sticker"]];
     }
+    
     self.attributedText = attributedString;
+    [self addTextStorageContainerManger];
+    
+    NSMutableArray * attRangeNotRequiredArray = [[NSMutableArray alloc] init];
+    
+    
+    [attributedString enumerateAttributesInRange:NSMakeRange(0, attributedString.length) options:NSAttributedStringEnumerationLongestEffectiveRangeNotRequired usingBlock:^(NSDictionary<NSString *,id> * _Nonnull attrs, NSRange range, BOOL * _Nonnull stop) {
+        
+        if ([attrs[@"NSAttachment"] isKindOfClass:[NSTextAttachment class]]) {
+            [attRangeNotRequiredArray addObject:@{@"attrs":attrs,@"range":[NSValue valueWithRange:range]}];
+        }
+    }];
+    
+    for(NSInteger j = attRangeNotRequiredArray.count -1 ; j >= 0 ; j--){
+        if ([gifArray[j][@"type"] isEqualToString:@"gif"]) {
+            NSString * stickerName = gifArray[j][@"stickerName"];
+            NSRange range;
+            [attRangeNotRequiredArray[j][@"range"] getValue:&range];
+            CGRect stickerRect = [self.layoutManager boundingRectForGlyphRange:range inTextContainer:self.textContainer];
+            UIImageView * gifImageView = [[UIImageView alloc] initWithFrame:CGRectMake(stickerRect.origin.x ,stickerRect.origin.y, stickerSize.width, stickerSize.height)];
+            [gifImageView setImage:[UIImage GGAnimatedGIFNamed:stickerName]];
+            [self addSubview:gifImageView];
+
+        }
+    }
     self->GGText_ = attributedString;
     return self;
 }
@@ -98,6 +104,8 @@
         NSMutableAttributedString * attributedText= [[NSMutableAttributedString alloc] initWithString:(NSString *)text];
         self->GGText_ = attributedText;
         self.attributedText = attributedText;
+        [self addTextStorageContainerManger];
+
         return self;
     }
     return self;
@@ -108,6 +116,7 @@
     self = [super initWithFrame:frame];
     if (self) {
         [self prepareTextSystem];
+        self.textContainer.size = self.frame.size;
     }
     return self;
 }
@@ -120,7 +129,8 @@
       mutableAttributedString = block(self->GGText_);
     }
     self.attributedText = mutableAttributedString;
-    
+    self->GGText_ = mutableAttributedString;
+
     return self;
 }
 
@@ -217,7 +227,13 @@
     [self.layoutManager drawGlyphsForGlyphRange:range atPoint:CGPointZero];
 }
 
-
+//-(void)setFont:(UIFont *)font
+//{
+//    [self addAttributeWithBlock:^NSMutableAttributedString *(NSMutableAttributedString *mutableAttributedString) {
+//        [mutableAttributedString addAttribute:NSFontAttributeName value:font range:NSMakeRange(0, mutableAttributedString.length)];
+//        return   mutableAttributedString;
+//    }];
+//}
 
 
 - (void)prepareTextSystem {
@@ -245,6 +261,23 @@
     [self.linkRanges addObjectsFromArray:[self getRanges:pattern]];
     [self setNeedsDisplay];
 }
+
+- (void)addTextStorageContainerManger {
+    
+    NSAttributedString *attrString;
+    if (self.attributedText)
+        attrString = self.attributedText;
+    else if (self.text)
+        attrString = [[NSAttributedString alloc]initWithString:self.text];
+    else
+        attrString = [[NSAttributedString alloc]initWithString:@""];
+    self.selectedDic = nil;
+    NSMutableAttributedString *attrMString = [self getNewAttString:attrString];
+    [self.textStorage setAttributedString:attrMString];
+    [self setNeedsDisplay];
+}
+
+
 
 - (NSMutableArray<NSValue *> *)getRanges:(NSString*)pattern{
     
@@ -312,6 +345,5 @@
     }
     return _blockArray;
 }
-
 
 @end

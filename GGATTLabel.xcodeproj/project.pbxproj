@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		62BBB63F1F4E69A0009FC1CE /* ee_035@2x.gif in Resources */ = {isa = PBXBuildFile; fileRef = 62BBB63E1F4E69A0009FC1CE /* ee_035@2x.gif */; };
+		62BBB6421F4E69F6009FC1CE /* UIImage+GGImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 62BBB6411F4E69F6009FC1CE /* UIImage+GGImage.m */; };
 		62CF0F361F43D43000102972 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 62CF0F351F43D43000102972 /* main.m */; };
 		62CF0F391F43D43000102972 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 62CF0F381F43D43000102972 /* AppDelegate.m */; };
 		62CF0F411F43D43000102972 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 62CF0F401F43D43000102972 /* Assets.xcassets */; };
@@ -35,6 +37,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		62BBB63E1F4E69A0009FC1CE /* ee_035@2x.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "ee_035@2x.gif"; sourceTree = "<group>"; };
+		62BBB6401F4E69F6009FC1CE /* UIImage+GGImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+GGImage.h"; sourceTree = "<group>"; };
+		62BBB6411F4E69F6009FC1CE /* UIImage+GGImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+GGImage.m"; sourceTree = "<group>"; };
 		62CF0F311F43D43000102972 /* GGATTLabel.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GGATTLabel.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		62CF0F351F43D43000102972 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		62CF0F371F43D43000102972 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -82,6 +87,7 @@
 		62CF0F281F43D43000102972 = {
 			isa = PBXGroup;
 			children = (
+				62BBB63E1F4E69A0009FC1CE /* ee_035@2x.gif */,
 				62CF0F6F1F43DBC700102972 /* faceMap_ch.plist */,
 				62CF0F331F43D43000102972 /* GGATTLabel */,
 				62CF0F4D1F43D43000102972 /* GGATTLabelTests */,
@@ -103,6 +109,8 @@
 		62CF0F331F43D43000102972 /* GGATTLabel */ = {
 			isa = PBXGroup;
 			children = (
+				62BBB6401F4E69F6009FC1CE /* UIImage+GGImage.h */,
+				62BBB6411F4E69F6009FC1CE /* UIImage+GGImage.m */,
 				62CF0F371F43D43000102972 /* AppDelegate.h */,
 				62CF0F381F43D43000102972 /* AppDelegate.m */,
 				62CF0F6A1F43D46600102972 /* RootViewController.h */,
@@ -252,6 +260,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				62CF0F411F43D43000102972 /* Assets.xcassets in Resources */,
+				62BBB63F1F4E69A0009FC1CE /* ee_035@2x.gif in Resources */,
 				62CF0F701F43DBC700102972 /* faceMap_ch.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -277,6 +286,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				62BBB6421F4E69F6009FC1CE /* UIImage+GGImage.m in Sources */,
 				62CF0F691F43D45500102972 /* GGATTLabel.m in Sources */,
 				62CF0F391F43D43000102972 /* AppDelegate.m in Sources */,
 				62CF0F6C1F43D46600102972 /* RootViewController.m in Sources */,
