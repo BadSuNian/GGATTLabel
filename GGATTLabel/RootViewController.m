@@ -22,7 +22,11 @@
     GGATTLabel * ggLabel = [[GGATTLabel alloc] initWithFrame:CGRectMake(10, 100, self.view.bounds.size.width-20, 400)];
     
 //    [ggLabel setText:@"GGLab\nel表情[:D][8o|][(D)]http://baidu.com A http://baidu.com \n0411-85326111 " stickerDic:[[NSDictionary alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"faceMap_ch" ofType:@"plist"]] stickerSize:CGSizeMake(15,15) pattern:@"\\[([^\\[\\]]+)\\]"];
-    [[[ggLabel setText:@"GGLab\nel表情[:D][:D][:D][:D][:D][:D][:D][8o|][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)]http://baidu.com A http://baidu.com \n0411-85326111 "] addAttributeWithBlock:^NSMutableAttributedString *(NSMutableAttributedString *mutableAttributedString) {
+    
+    
+
+    
+    [[ggLabel setText:@"GGLab\nel表情[:D][:D][:D][:D][:D][:D][:D][8o|][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)][(D)]http://baidu.com A http://baidu.com \n0411-85326111 "] addAttributeWithBlock:^NSMutableAttributedString *(NSMutableAttributedString *mutableAttributedString) {
         [mutableAttributedString addAttribute:NSForegroundColorAttributeName
                                 value:[UIColor redColor]
                                 range:NSMakeRange(0, 1)];
@@ -32,7 +36,12 @@
                                         range:NSMakeRange(1, 3)];
  
         return mutableAttributedString;
-    }] stickerDic:[[NSDictionary alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"faceMap_ch" ofType:@"plist"]] stickerSize:CGSizeMake(30,30) pattern:@"\\[([^\\[\\]]+)\\]"] ;
+    }] ;
+    [ggLabel addAttributeWithBlock:^NSMutableAttributedString *(NSMutableAttributedString *mutableAttributedString) {
+        [mutableAttributedString addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:30] range:NSMakeRange(0, mutableAttributedString.length)];
+        return mutableAttributedString;
+    }];
+    [ggLabel stickerDic:[[NSDictionary alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"faceMap_ch" ofType:@"plist"]] stickerSize:CGSizeMake(30,30) pattern:@"\\[([^\\[\\]]+)\\]"] ;
 //    [ggLabel setFont:[UIFont systemFontOfSize:30]];
 
     [ggLabel urlColor:[UIColor greenColor] pattern:@"http(s)?://([\\w-]+\\.)+[\\w-]+(/[\\w- ./?%&=]*)?" tapBlock:^(NSString *selectStr, NSRange range) {
@@ -45,10 +54,6 @@
         
     }];
     
-    [ggLabel addAttributeWithBlock:^NSMutableAttributedString *(NSMutableAttributedString *mutableAttributedString) {
-        [mutableAttributedString addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:30] range:NSMakeRange(0, mutableAttributedString.length)];
-        return mutableAttributedString;
-    }];
     ggLabel.numberOfLines = 0;
     [self.view addSubview:ggLabel];
     

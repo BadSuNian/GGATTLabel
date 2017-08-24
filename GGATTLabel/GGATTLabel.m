@@ -21,15 +21,11 @@
 @end
 
 @implementation GGATTLabel
-{
-    NSMutableAttributedString * GGText_;
-}
-
 
 
 - (GGATTLabel *)stickerDic:(NSDictionary *)stickerDic stickerSize:(CGSize)stickerSize pattern:(NSString *)pattern
 {
-
+    [self removeGif];
     NSArray *stickerValuesArray = [stickerDic allValues];
     NSArray *stickerKeyArray = [stickerDic allKeys];
     NSError *error = nil;
@@ -37,7 +33,7 @@
     if (!re) {
         NSLog(@"GGATTLabel err ==  %@", [error localizedDescription]);
     }
-    NSMutableAttributedString *attributedString = self->GGText_;
+    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithAttributedString:self.attributedText];
     NSArray *stickerResultArray = [re matchesInString:attributedString.string options:0 range:NSMakeRange(0, attributedString.string.length)];
     NSMutableArray *stickerLoctionArray = [NSMutableArray arrayWithCapacity:stickerResultArray.count];
     NSMutableArray * gifArray = [[NSMutableArray alloc] init];
@@ -58,12 +54,10 @@
                                     [stickerAttachment setImage:[UIImage GGAnimatedGIFNamed:stickerKeyArray[i]]];
                                     [gifArray addObject:@{@"stickerName":stickerKeyArray[i],@"range":[NSValue valueWithRange:range],@"type":@"png"}];
                                 }
-                
                 [stickerLoctionArray addObject:@{@"sticker":[NSAttributedString attributedStringWithAttachment:stickerAttachment],@"range":[NSValue valueWithRange:range]}];
             }
         }
     }
-       
     for (NSInteger i = stickerLoctionArray.count - 1; i >= 0; i--){
         NSRange range;
         [stickerLoctionArray[i][@"range"] getValue:&range];
@@ -74,8 +68,6 @@
     [self addTextStorageContainerManger];
     
     NSMutableArray * attRangeNotRequiredArray = [[NSMutableArray alloc] init];
-    
-    
     [attributedString enumerateAttributesInRange:NSMakeRange(0, attributedString.length) options:NSAttributedStringEnumerationLongestEffectiveRangeNotRequired usingBlock:^(NSDictionary<NSString *,id> * _Nonnull attrs, NSRange range, BOOL * _Nonnull stop) {
         
         if ([attrs[@"NSAttachment"] isKindOfClass:[NSTextAttachment class]]) {
@@ -95,14 +87,13 @@
 
         }
     }
-    self->GGText_ = attributedString;
     return self;
 }
 
 - (GGATTLabel *)setText:(id)text{
+    [self.blockArray removeAllObjects];
     if ([text isKindOfClass:[NSString class]]) {
         NSMutableAttributedString * attributedText= [[NSMutableAttributedString alloc] initWithString:(NSString *)text];
-        self->GGText_ = attributedText;
         self.attributedText = attributedText;
         [self addTextStorageContainerManger];
 
@@ -126,23 +117,22 @@
     NSMutableAttributedString *mutableAttributedString = nil;
 
     if (block) {
-      mutableAttributedString = block(self->GGText_);
+      mutableAttributedString = block([[NSMutableAttributedString alloc] initWithAttributedString:self.attributedText]);
     }
     self.attributedText = mutableAttributedString;
-    self->GGText_ = mutableAttributedString;
 
     return self;
 }
 
 - (GGATTLabel *)urlColor:(UIColor *)urlColor pattern:(NSString *)pattern tapBlock:(void (^)(NSString *, NSRange))block {
     
-    if (!self->GGText_)
+    if (!self.attributedText)
         return self;
     NSError *error = nil;
         NSRegularExpression * re = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionCaseInsensitive error:&error];
             if (!re)
                 NSLog(@"GGATTLabel err ==  %@", [error localizedDescription]);
-            NSMutableAttributedString *attributedString = self->GGText_;
+            NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithAttributedString:self.attributedText] ;
             NSArray *stickerResultArray = [re matchesInString:attributedString.string options:0 range:NSMakeRange(0, attributedString.string.length)];
         for (NSTextCheckingResult *match in stickerResultArray) {
             [self addAttributeWithBlock:^NSMutableAttributedString *(NSMutableAttributedString *mutableAttributedString) {
@@ -309,7 +299,13 @@
     return newAttString;
 }
 
+- (void)removeGif{
+    
+    for(int i = 0;i<=[self.subviews count];i++){
+        [[self.subviews objectAtIndex:i] removeFromSuperview];
+    }
 
+}
 
 #pragma mark - 懒加载
 - (NSTextStorage*)textStorage{
