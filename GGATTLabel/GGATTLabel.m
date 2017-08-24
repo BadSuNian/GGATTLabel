@@ -82,7 +82,10 @@
             [attRangeNotRequiredArray[j][@"range"] getValue:&range];
             CGRect stickerRect = [self.layoutManager boundingRectForGlyphRange:range inTextContainer:self.textContainer];
             UIImageView * gifImageView = [[UIImageView alloc] initWithFrame:CGRectMake(stickerRect.origin.x ,stickerRect.origin.y, stickerSize.width, stickerSize.height)];
-            [gifImageView setImage:[UIImage GGAnimatedGIFNamed:stickerName]];
+
+            @autoreleasepool {
+                [gifImageView setImage:[UIImage GGAnimatedGIFNamed:stickerName]];
+            }
             [self addSubview:gifImageView];
 
         }
@@ -216,14 +219,6 @@
     NSRange range = NSMakeRange(0, self.textStorage.length);
     [self.layoutManager drawGlyphsForGlyphRange:range atPoint:CGPointZero];
 }
-
-//-(void)setFont:(UIFont *)font
-//{
-//    [self addAttributeWithBlock:^NSMutableAttributedString *(NSMutableAttributedString *mutableAttributedString) {
-//        [mutableAttributedString addAttribute:NSFontAttributeName value:font range:NSMakeRange(0, mutableAttributedString.length)];
-//        return   mutableAttributedString;
-//    }];
-//}
 
 
 - (void)prepareTextSystem {
