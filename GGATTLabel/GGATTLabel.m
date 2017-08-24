@@ -296,7 +296,7 @@
 
 - (void)removeGif{
     
-    for(int i = 0;i<=[self.subviews count];i++){
+    for(int i = 0;i < [self.subviews count];i++){
         [[self.subviews objectAtIndex:i] removeFromSuperview];
     }
 
