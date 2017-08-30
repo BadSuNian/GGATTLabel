@@ -18,6 +18,8 @@
 @property (nonatomic, strong) NSDictionary *selectedDic;
 @property (nonatomic, assign) BOOL  isSelected;
 @property (nonatomic, strong) NSMutableArray * blockArray;
+@property (nonatomic, strong) NSMutableArray * gifArray;
+@property (nonatomic, assign) CGSize stickerSize;
 @end
 
 @implementation GGATTLabel
@@ -26,6 +28,8 @@
 - (GGATTLabel *)stickerDic:(NSDictionary *)stickerDic stickerSize:(CGSize)stickerSize pattern:(NSString *)pattern
 {
     [self removeGif];
+    [self.gifArray removeAllObjects];
+    self.stickerSize = stickerSize;
     NSArray *stickerValuesArray = [stickerDic allValues];
     NSArray *stickerKeyArray = [stickerDic allKeys];
     NSError *error = nil;
@@ -36,7 +40,6 @@
     NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithAttributedString:self.attributedText];
     NSArray *stickerResultArray = [re matchesInString:attributedString.string options:0 range:NSMakeRange(0, attributedString.string.length)];
     NSMutableArray *stickerLoctionArray = [NSMutableArray arrayWithCapacity:stickerResultArray.count];
-    NSMutableArray * gifArray = [[NSMutableArray alloc] init];
     for(NSTextCheckingResult *match in stickerResultArray) {
         NSRange range = [match range];
         NSString *subStr = [attributedString.string substringWithRange:range];
@@ -46,13 +49,14 @@
                 NSTextAttachment *stickerAttachment = [[NSTextAttachment alloc] init];
                 stickerAttachment.bounds = CGRectMake(stickerAttachment.bounds.origin.x, stickerAttachment.bounds.origin.y , stickerSize.width,stickerSize.height);
                                 if ([UIImage isGif:stickerKeyArray[i]]) {
+                                    
                                     [stickerAttachment setImage:[UIImage imageNamed:@""]];
-                                    [gifArray addObject:@{@"stickerName":stickerKeyArray[i],@"range":[NSValue valueWithRange:range],@"type":@"gif"}];
+                                    [self.gifArray addObject:@{@"stickerName":stickerKeyArray[i],@"range":[NSValue valueWithRange:range],@"type":@"gif"}];
                                 }
                                 else
                                 {
                                     [stickerAttachment setImage:[UIImage GGAnimatedGIFNamed:stickerKeyArray[i]]];
-                                    [gifArray addObject:@{@"stickerName":stickerKeyArray[i],@"range":[NSValue valueWithRange:range],@"type":@"png"}];
+                                    [self.gifArray addObject:@{@"stickerName":stickerKeyArray[i],@"range":[NSValue valueWithRange:range],@"type":@"png"}];
                                 }
                 [stickerLoctionArray addObject:@{@"sticker":[NSAttributedString attributedStringWithAttachment:stickerAttachment],@"range":[NSValue valueWithRange:range]}];
             }
@@ -65,31 +69,7 @@
     }
     
     self.attributedText = attributedString;
-    [self addTextStorageContainerManger];
     
-    NSMutableArray * attRangeNotRequiredArray = [[NSMutableArray alloc] init];
-    [attributedString enumerateAttributesInRange:NSMakeRange(0, attributedString.length) options:NSAttributedStringEnumerationLongestEffectiveRangeNotRequired usingBlock:^(NSDictionary<NSString *,id> * _Nonnull attrs, NSRange range, BOOL * _Nonnull stop) {
-        
-        if ([attrs[@"NSAttachment"] isKindOfClass:[NSTextAttachment class]]) {
-            [attRangeNotRequiredArray addObject:@{@"attrs":attrs,@"range":[NSValue valueWithRange:range]}];
-        }
-    }];
-    
-    for(NSInteger j = attRangeNotRequiredArray.count -1 ; j >= 0 ; j--){
-        if ([gifArray[j][@"type"] isEqualToString:@"gif"]) {
-            NSString * stickerName = gifArray[j][@"stickerName"];
-            NSRange range;
-            [attRangeNotRequiredArray[j][@"range"] getValue:&range];
-            CGRect stickerRect = [self.layoutManager boundingRectForGlyphRange:range inTextContainer:self.textContainer];
-            UIImageView * gifImageView = [[UIImageView alloc] initWithFrame:CGRectMake(stickerRect.origin.x ,stickerRect.origin.y, stickerSize.width, stickerSize.height)];
-
-            @autoreleasepool {
-                [gifImageView setImage:[UIImage GGAnimatedGIFNamed:stickerName]];
-            }
-            [self addSubview:gifImageView];
-
-        }
-    }
     return self;
 }
 
@@ -109,6 +89,7 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
+        self.layer.ShouldRasterize = YES;
         [self prepareTextSystem];
         self.textContainer.size = self.frame.size;
     }
@@ -149,12 +130,15 @@
     
     
     
-    if (block) {
-       void (^tapBlock)(NSString * str, NSRange range) = ^(NSString * str, NSRange range){
-            block(str,range);
-        };
-        [self.blockArray addObject:@{pattern:tapBlock}];
-    }
+//    if (block) {
+//       void (^tapBlock)(NSString * str, NSRange range) = ^(NSString * str, NSRange range){
+//            block(str,range);
+//        };
+//        [self.blockArray addObject:@{pattern:tapBlock}];
+//    }
+    
+    [self.blockArray addObject:@{pattern: block}];
+    
     return self;
 }
 #pragma mark --- 手势
@@ -216,6 +200,34 @@
         [self.textStorage addAttribute:NSBackgroundColorAttributeName value:selectColor range:value.rangeValue];
         [self.layoutManager drawBackgroundForGlyphRange:value.rangeValue atPoint:CGPointMake(0, 0)];
     }
+    else
+    {
+        [self addTextStorageContainerManger];
+        NSMutableArray * attRangeNotRequiredArray = [[NSMutableArray alloc] init];
+        [self.attributedText enumerateAttributesInRange:NSMakeRange(0, self.attributedText.length) options:NSAttributedStringEnumerationLongestEffectiveRangeNotRequired usingBlock:^(NSDictionary<NSString *,id> * _Nonnull attrs, NSRange range, BOOL * _Nonnull stop) {
+            
+            if ([attrs[@"NSAttachment"] isKindOfClass:[NSTextAttachment class]]) {
+                [attRangeNotRequiredArray addObject:@{@"attrs":attrs,@"range":[NSValue valueWithRange:range]}];
+            }
+        }];
+        
+        for(NSInteger j = attRangeNotRequiredArray.count -1 ; j >= 0 ; j--){
+            if ([self.gifArray[j][@"type"] isEqualToString:@"gif"]) {
+                NSString * stickerName = self.gifArray[j][@"stickerName"];
+                NSRange range;
+                [attRangeNotRequiredArray[j][@"range"] getValue:&range];
+                CGRect stickerRect = [self.layoutManager boundingRectForGlyphRange:range inTextContainer:self.textContainer];
+                UIImageView * gifImageView = [[UIImageView alloc] initWithFrame:CGRectMake(stickerRect.origin.x ,stickerRect.origin.y, self.stickerSize.width, self.stickerSize.height)];
+                
+                @autoreleasepool {
+                    [gifImageView setImage:[UIImage GGAnimatedGIFNamed:stickerName]];
+                }
+                [self addSubview:gifImageView];
+                
+            }
+        }
+        
+    }
     NSRange range = NSMakeRange(0, self.textStorage.length);
     [self.layoutManager drawGlyphsForGlyphRange:range atPoint:CGPointZero];
 }
@@ -244,7 +256,6 @@
     [self.textStorage setAttributedString:attrMString];
     
     [self.linkRanges addObjectsFromArray:[self getRanges:pattern]];
-    [self setNeedsDisplay];
 }
 
 - (void)addTextStorageContainerManger {
@@ -259,7 +270,6 @@
     self.selectedDic = nil;
     NSMutableAttributedString *attrMString = [self getNewAttString:attrString];
     [self.textStorage setAttributedString:attrMString];
-    [self setNeedsDisplay];
 }
 
 
@@ -281,12 +291,11 @@
     NSMutableAttributedString *newAttString = [[NSMutableAttributedString alloc]initWithAttributedString:attrString];
     if (newAttString.length == 0)
         return newAttString;
-    NSRange range = NSMakeRange(0, 0);
-    NSMutableDictionary *dict = (NSMutableDictionary*)[newAttString attributesAtIndex:0 effectiveRange:&range];
+    NSRange range = NSMakeRange(0, newAttString.length);
+    NSMutableDictionary *dict = (NSMutableDictionary*)[newAttString attributesAtIndex:0 effectiveRange:NULL];
     NSMutableParagraphStyle *paragraphStyle = [dict[NSParagraphStyleAttributeName] mutableCopy] ;
-    if (paragraphStyle)
-        paragraphStyle.lineBreakMode = NSLineBreakByCharWrapping;
-    else {
+    if (!paragraphStyle)
+    {
         paragraphStyle = [[NSMutableParagraphStyle alloc]init];
         paragraphStyle.lineBreakMode = NSLineBreakByCharWrapping;
     }
@@ -335,6 +344,12 @@
         _blockArray = [[NSMutableArray alloc] init];
     }
     return _blockArray;
+}
+- (NSMutableArray * )gifArray{
+    if (!_gifArray) {
+        _gifArray = [[NSMutableArray alloc] init];
+    }
+    return _gifArray;
 }
 
 @end
